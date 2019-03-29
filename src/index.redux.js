@@ -2,7 +2,7 @@ const ADD_GUN = 'add'
 const REMOVE_GUN = 'remove'
 
 // reducer
-export function counter(state=0,action){
+export function counter(state=7,action){
   switch(action.type){
     case ADD_GUN:
       return state+1
