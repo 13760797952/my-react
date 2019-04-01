@@ -10,11 +10,13 @@ import reducer from './reducer'
 
 import Auth from './Auth.js'
 import Dashboard from './Dashboard.js'
+import './config'
+import 'antd-mobile/dist/antd-mobile.css';
 
 
 const store = createStore(reducer,compose(
   applyMiddleware(thunk),
-  window.devToolsExtension?window.devToolsExtension():f=>{}
+  window.devToolsExtension?window.devToolsExtension():f=>f
 ))
 
 // class Test extends React.Component{
