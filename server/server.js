@@ -1,53 +1,37 @@
 const express = require('express')
-const mongoose = require('mongoose')
+const utils = require('utility')
+const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const userRouter = require('./user')
+const model = require('./model')
+const Chat = model.getModel('chat')
 
-// 链接mongo   并且使用imooc集合
-const DB_URL = 'mongodb://localhost:27017/imooc'
-mongoose.connect(DB_URL)
-mongoose.connection.on('connected',function(){
-  console.log('链接成功')
-})
-
-const User = mongoose.model('user',new mongoose.Schema({
-  user:{type:String,require:true},
-  age:{type:Number,require:true}
-}))
-// 新增数据
-// User.create({
-//   user:'imooc',
-//   age:18,
-// },function(err,doc){
-//   if(!err){
-//     console.log(doc)
-//   }
-// })
-
-// 更新数据
-// User.update({_id:'5c9c39ce0379140fc4dd76bb'},{'$set':{age:23}},function(err,doc){
-//   if(!err){
-//     console.log(doc)
-//   }
-// })
-
-// 删除数据
-// User.remove({age:18},function(err,doc){
-//   if(!err){
-//     console.log(doc)
-//   }
-// })
-// 新建app
 const app = express()
+//work with express
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
 
-app.get('/',function(req,res){
-  res.send('<h1>(*´▽｀)ノノ你好</h1>')
-})
-app.get('/data',function(req,res){
-  // 查询数据
-  User.findOne({age:23},function(err,doc){
-    res.json(doc)
+io.on('connection',function(socket){
+  socket.on('sendmsg',function(data){
+    // console.log(data)
+    // io.emit('revicemsg',data)
+    const {from,to,msg} = data
+    const chatid = [from,to].sort().join('_')
+    Chat.create({chatid,from,to,content:msg},function(err,doc){
+      io.emit('recvmsg',Object.assign({},doc._doc))
+    })
   })
 })
 
-app.listen(9093,function(){
+
+app.use(cookieParser())
+app.use(bodyParser.json())
+app.use('/user',userRouter)
+// // 新建app
+// app.get('/',function(req,res){
+//   res.send('<h1>(*´▽｀)ノノ你好</h1>')
+// })
+
+server.listen(9093,function(){
   console.log('端口9093')
 })
